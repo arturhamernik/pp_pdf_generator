@@ -18,53 +18,49 @@ import java.time.LocalDate
 @Service
 class CertificateService(val csvParser: CsvParser) {
 
-    fun generate(file: MultipartFile, issuer: String) : MutableList<CertificateResponse> {
+    fun generate(file: MultipartFile, issuer: String) : MutableList<CertificateDto> {
         val certificates = csvParser.readCsvFile(file);
         return generateCertificates(certificates, issuer)
     }
 
-    private fun generateCertificates(certificates: List<PersonCertificate>, issuer: String): MutableList<CertificateResponse> {
-        val certificatesAsPdfs = generatePdfBytes(certificates, issuer)
-        return generateCertificatesResult(certificates, certificatesAsPdfs, issuer).stream()
-            .map { dto ->
-            CertificateResponse(
-                dto.checksum,
-                dto.recipientName,
-                dto.recipientSurname,
-                (dto.expireDate.toEpochDay() - dto.issueDate.toEpochDay()).toString(),
-                dto.url,
-                dto.owner
-            )
-        }.toList()
+    private fun generateCertificates(certificates: List<PersonCertificate>, issuer: String): MutableList<CertificateDto> {
+        val certificatesAsPdfs = generatePdfBytesList(certificates, issuer)
+        return generateCertificatesResult(certificates, certificatesAsPdfs, issuer)
     }
 
-    private fun generatePdfBytes(certificate: List<PersonCertificate>, issuer: String): MutableList<ByteArray> {
+    private fun generatePdfBytesList(certificate: List<PersonCertificate>, issuer: String): MutableList<ByteArray> {
         val pdfs = mutableListOf<ByteArray>()
         for ((index, cert) in certificate.withIndex()) {
             val pdfBytes = generatePdfBytes(cert, issuer)
-            saveFileToResources(pdfBytes, cert)
             pdfs.add(pdfBytes)
         }
         return pdfs
     }
 
-    private fun saveFileToResources(pdfBytes: ByteArray, cert: PersonCertificate) {
-        val timestamp = System.currentTimeMillis();
-        val newFile: Path = Paths.get("src/main/resources/pdf/" + "certificate_${cert.firstName}_${cert.lastName}_${timestamp}.pdf")
+    private fun saveFileToResources(pdfBytes: ByteArray, filename: String) {
+        val newFile: Path = Paths.get("src/main/resources/pdf/" + "${filename}.pdf")
         Files.createDirectories(newFile.parent)
-        FileOutputStream("src/main/resources/pdf/" + "certificate_${cert.firstName}_${cert.lastName}_${timestamp}.pdf").use { fos -> fos.write(pdfBytes) }
+        FileOutputStream("src/main/resources/pdf/" + "${filename}.pdf").use { fos -> fos.write(pdfBytes) }
     }
 
     private fun getChecksum(bytes: ByteArray): String {
         val hash: ByteArray = MessageDigest.getInstance("SHA-256").digest(bytes)
-        val checksum = BigInteger(1, hash).toString(16)
-        return checksum
+        return BigInteger(1, hash).toString(16)
     }
 
     private fun generateCertificatesResult(certificates: List<PersonCertificate>, certificatesAsPdf: List<ByteArray>, issuer: String): MutableList<CertificateDto> {
         val list = mutableListOf<CertificateDto>()
         certificates.forEachIndexed { index, it ->
-            list.add(CertificateDto(it.firstName, it.lastName, getChecksum(certificatesAsPdf[index]), it.expirationDate, LocalDate.now(), it.name, issuer))
+            val checksum = getChecksum(certificatesAsPdf[index])
+            saveFileToResources(certificatesAsPdf[index], checksum)
+            list.add(CertificateDto(
+                checksum,
+                it.firstName,
+                it.lastName,
+                it.email,
+                it.daysValid,
+                it.certName,
+                issuer))
         }
         return list
     }
@@ -155,7 +151,7 @@ class CertificateService(val csvParser: CsvParser) {
             <div>This is to certify that</div>
             <div class="certificate-receiver">${personCertificate.firstName} ${personCertificate.lastName}</div>
             <div class="">has successfully completed the course</div>
-            <div class="certificate-course-name">${personCertificate.name}</div>
+            <div class="certificate-course-name">${personCertificate.certName}</div>
             <div class="">Certificate valid until ${personCertificate.expirationDate}</div>
         </div>
         <div class="my-footer">
