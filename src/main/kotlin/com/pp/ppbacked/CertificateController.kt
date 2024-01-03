@@ -18,13 +18,13 @@ class CertificateController(private val csvParser: CsvParser, private val certif
     @PostMapping("/import")
     fun importCsv(@RequestParam("file") file: MultipartFile) : ResponseEntity<Void> {
         val readCsvFile = csvParser.readCsvFile(file);
-        readCsvFile.stream().forEach { item -> println(item.name) }
+        readCsvFile.stream().forEach { item -> println(item.certName) }
 
         return ResponseEntity.ok(null);
     }
 
     @PostMapping("/generate")
-    fun generate(@RequestPart file: MultipartFile, @RequestPart issuer: String): ResponseEntity<List<CertificateResponse>> {
+    fun generate(@RequestPart file: MultipartFile, @RequestPart issuer: String): ResponseEntity<List<CertificateDto>> {
         return try {
             val certificates = certificateService.generate(file, issuer)
             ResponseEntity.ok(certificates)

@@ -1,4 +1,4 @@
-Name,FirstName,LastName,ExpirationDate
-Certyfikat-A,Szymon,Bilinski,2024-01-01
-Certyfikat-B,Gabriela,Jasnosz,2024-01-01
-Certyfikat-C,Kamil,Budzik,2024-01-01
+CertName,FirstName,LastName,Email,ExpirationDate
+Certyfikat-A,Szymon,Bilinski,bilinski@gmail.com,2024-10-01
+Certyfikat-B,Gabriela,Jasnosz,jasnosz@gmail.com,2024-10-01
+Certyfikat-C,Kamil,Budzik,budzik@gmail.com,2024-10-01
