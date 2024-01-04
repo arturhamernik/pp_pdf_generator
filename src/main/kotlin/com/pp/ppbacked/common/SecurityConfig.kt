@@ -1,4 +1,4 @@
-package com.pp.ppbacked
+package com.pp.ppbacked.common
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
