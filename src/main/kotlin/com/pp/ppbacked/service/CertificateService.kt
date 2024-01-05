@@ -1,7 +1,6 @@
 package com.pp.ppbacked.service
 
-import com.pp.ppbacked.dto.CertificateDto
-import com.pp.ppbacked.dto.CsvCertificateRecord
+import com.pp.ppbacked.rest.CertificateDto
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -12,6 +11,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.MessageDigest
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @Service
 class CertificateService(
@@ -20,10 +20,7 @@ class CertificateService(
     private val certificatePdfGenerator: CertificatePdfGenerator
 ) {
 
-    fun generate(
-        file: MultipartFile,
-        issuer: String
-    ) : MutableList<CertificateDto> {
+    fun generate(file: MultipartFile, issuer: String): List<CertificateDto> {
         val certificates = csvParser.readCsvFile(file);
         return generateCertificates(certificates, issuer)
     }
@@ -31,7 +28,7 @@ class CertificateService(
     private fun generateCertificates(
         certificates: List<CsvCertificateRecord>,
         issuer: String
-    ): MutableList<CertificateDto> {
+    ): List<CertificateDto> {
         val certificatesAsPdfs = generatePdfBytesList(certificates, issuer)
         return saveCertificatesFiles(certificates, certificatesAsPdfs, issuer)
     }
@@ -39,23 +36,34 @@ class CertificateService(
     private fun generatePdfBytesList(
         certificates: List<CsvCertificateRecord>,
         issuer: String
-    ): MutableList<ByteArray> {
-        val pdfs = mutableListOf<ByteArray>()
-        for (cert in certificates) {
-            val pdfBytes = certificatePdfGenerator.generatePdfBytes(cert, issuer)
-            pdfs.add(pdfBytes)
+    ): List<ByteArray> {
+        return certificates.map {
+            certificatePdfGenerator.generatePdfBytes(it, issuer)
         }
-        return pdfs
     }
 
-    private fun saveFileToResources(
-        pdfBytes: ByteArray,
-        filename: String
-    ) {
-        val filePath: String = certificateDirectory + "${filename}.pdf"
-        val newFile: Path = Paths.get(filePath)
-        Files.createDirectories(newFile.parent)
-        FileOutputStream(filePath).use { fos -> fos.write(pdfBytes) }
+    private fun saveCertificatesFiles(
+        certificates: List<CsvCertificateRecord>,
+        certificatesAsPdf: List<ByteArray>,
+        issuer: String
+    ): List<CertificateDto> {
+        return certificates.mapIndexed { index, cert ->
+            val checksum = getChecksum(certificatesAsPdf[index])
+            saveFileToResources(certificatesAsPdf[index], checksum)
+
+            val daysValid = ChronoUnit.DAYS.between(LocalDate.now(), cert.expirationDate)
+                .coerceAtLeast(0).toString()
+
+            CertificateDto(
+                checksum = checksum,
+                recipientName = cert.firstName,
+                recipientSurname = cert.lastName,
+                recipientEmail = cert.email,
+                daysValid = daysValid,
+                certName = cert.certName,
+                issuer = issuer
+            )
+        }
     }
 
     private fun getChecksum(bytes: ByteArray): String {
@@ -63,27 +71,11 @@ class CertificateService(
         return BigInteger(1, hash).toString(16)
     }
 
-    private fun saveCertificatesFiles(
-        certificates: List<CsvCertificateRecord>,
-        certificatesAsPdf: List<ByteArray>,
-        issuer: String
-    ): MutableList<CertificateDto> {
-        val list = mutableListOf<CertificateDto>()
-        certificates.forEachIndexed { index, it ->
-            val checksum = getChecksum(certificatesAsPdf[index])
-            saveFileToResources(certificatesAsPdf[index], checksum)
-            list.add(
-                CertificateDto(
-                    checksum,
-                    it.firstName,
-                    it.lastName,
-                    it.email,
-                    (it.expirationDate.toEpochDay() - LocalDate.now().toEpochDay()).toString(),
-                    it.certName,
-                    issuer
-                )
-            )
-        }
-        return list
+    private fun saveFileToResources(pdfBytes: ByteArray, filename: String) {
+        val filePath: String = certificateDirectory + "${filename}.pdf"
+        val newFile: Path = Paths.get(filePath)
+        Files.createDirectories(newFile.parent)
+        FileOutputStream(filePath).use { fos -> fos.write(pdfBytes) }
     }
+
 }
