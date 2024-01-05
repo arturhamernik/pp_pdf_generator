@@ -1,4 +1,4 @@
-package com.pp.ppbacked.common
+package com.pp.ppbacked.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -10,7 +10,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig() {
+class SecurityConfig {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -19,17 +19,15 @@ class SecurityConfig() {
         UrlBasedCorsConfigurationSource()
             .registerCorsConfiguration("/**", corsConfig)
 
-        http
+        return http
             .cors { it.configurationSource { corsConfig } }
             .csrf { it.disable() }
-        return http.build()
+            .build()
     }
 
-    private fun prepareCorsConfiguration(): CorsConfiguration {
-        val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("*")
-        configuration.allowedMethods = listOf("*")
-        configuration.allowedHeaders = listOf("*")
-        return configuration
+    private fun prepareCorsConfiguration() = CorsConfiguration().apply {
+        allowedOrigins = listOf("*")
+        allowedMethods = listOf("*")
+        allowedHeaders = listOf("*")
     }
 }

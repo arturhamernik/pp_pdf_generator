@@ -1,6 +1,5 @@
-package com.pp.ppbacked.controller
+package com.pp.ppbacked.rest
 
-import com.pp.ppbacked.dto.CertificateDto
 import com.pp.ppbacked.service.CertificateService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -14,7 +13,7 @@ class CertificateController(
     private val certificateService: CertificateService
 ) {
 
-    @PostMapping()
+    @PostMapping
     fun generate(@RequestPart file: MultipartFile, @RequestPart issuer: String): List<CertificateDto> {
         return certificateService.generate(file, issuer)
     }
