@@ -15,14 +15,18 @@ class EmailController(
     private val emailSenderService: EmailSenderService
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
     @PostMapping
     fun send(@RequestPart file: MultipartFile, @RequestPart emailRequest: String) {
-        logger.info(emailRequest)
+        logger.info("Sending email!")
         emailSenderService.sendSingleEmail(file, emailRequest)
+        logger.info("Email sent successfully!")
     }
 
     @PostMapping("/bulk")
     fun sendBulk(@RequestBody emailRequests: Array<CertificateEmailRequest>) {
+        logger.info("Sending emails in bulk!")
         emailSenderService.sendBulkEmail(emailRequests)
+        logger.info("Emails sent successfully!")
     }
 }
