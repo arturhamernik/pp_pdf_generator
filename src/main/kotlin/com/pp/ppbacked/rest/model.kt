@@ -1,4 +1,4 @@
-package com.pp.ppbacked
+package com.pp.ppbacked.rest
 
 data class CertificateDto(
     val checksum: String,
