@@ -4,6 +4,7 @@ services:
     build:
       context: .
     image: pp-backend
+    container_name: pp-backend
     user: "1000:1000"
     deploy:
       resources:
