@@ -1,13 +1,14 @@
 package com.pp.ppbacked.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.pp.ppbacked.common.ValidationException
 import com.pp.ppbacked.rest.CertificateEmailRequest
 import jakarta.mail.internet.MimeMessage
+import org.slf4j.LoggerFactory
+import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
-import org.springframework.web.multipart.MultipartFile
 
 @Service
 class EmailSenderService(
@@ -15,40 +16,64 @@ class EmailSenderService(
     private val emailSender: JavaMailSender,
     private val template: SimpleMailMessage
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun sendSingleEmail(file: MultipartFile, emailRequestString: String) {
-        val mapper = ObjectMapper()
-        val emailRequest: CertificateEmailRequest = mapper.readValue(emailRequestString, CertificateEmailRequest::class.java)
-        fileHelper.saveFileToResources(file.bytes, emailRequest.checksum)
-
-        sendEmail(createMessage(emailRequest))
+    fun sendSingleEmail(request: CertificateEmailRequest) {
+        val message = createMessage(request)
+        sendEmail(message, request.checksum, request.recipientEmail)
     }
 
-    fun sendBulkEmail(emailRequests: Array<CertificateEmailRequest>) {
-        emailRequests.forEach { request ->
-               sendEmail(createMessage(request))
+    fun sendBulkEmail(request: Set<CertificateEmailRequest>) {
+        request.forEach {
+            sendSingleEmail(it)
         }
     }
 
-    private fun createMessage(emailRequest: CertificateEmailRequest): MimeMessage {
-        val file = fileHelper.getFileFromResources(emailRequest.checksum)
+    private fun createMessage(request: CertificateEmailRequest): MimeMessage {
+        if (!isValidEmail(request.recipientEmail)) {
+            throw ValidationException("Invalid email: ${request.recipientEmail} for checksum : ${request.checksum}")
+        }
+
+        val certificatePdf = fileHelper.getFileFromResources(request.checksum)
+        if (!certificatePdf.exists()) {
+            throw ValidationException("Certificate pdf file does not exist for checksum: ${request.checksum}")
+        }
+
         val message: MimeMessage = emailSender.createMimeMessage()
         val helper = MimeMessageHelper(message, true)
-        helper.setTo(emailRequest.recipientEmail)
+        helper.setTo(request.recipientEmail)
         helper.setSubject(template.subject!!)
-        helper.setText(template.text!!.format(
-            emailRequest.recipientName,
-            emailRequest.recipientSurname,
-            emailRequest.issuer))
+        helper.setText(
+            template.text!!.format(
+                request.recipientName,
+                request.recipientLastname,
+                request.issuer
+            )
+        )
         helper.addAttachment(
-            "Certificate_${emailRequest.recipientName + "_"
-                    + emailRequest.recipientSurname}.pdf",
-            file)
+            "Certificate_${request.recipientName + "_" + request.recipientLastname}.pdf",
+            certificatePdf
+        )
 
         return message
     }
 
-    private fun sendEmail(message: MimeMessage) {
-        emailSender.send(message)
+    private fun sendEmail(message: MimeMessage, checksum: String, recipientEmail: String) {
+        try {
+            logger.info("Sending email!")
+            emailSender.send(message)
+        } catch (ex: MailException) {
+            logger.warn(
+                "Could not send email to: $recipientEmail for checksum: $checksum",
+                ex.message
+            )
+        }
+        logger.info("Email to: $recipientEmail sent successfully!")
     }
+
+    private fun isValidEmail(email: String): Boolean {
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        return emailRegex.matches(email)
+    }
+
 }

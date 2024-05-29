@@ -1,21 +1,30 @@
 package com.pp.ppbacked.rest
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import java.time.LocalDate
 
-data class CertificateDto(
+data class CertificateResponse(
     val checksum: String,
+    val certificateName: String,
     val recipientName: String,
-    val recipientSurname: String,
+    val recipientLastname: String,
     val recipientEmail: String,
     val daysValid: String,
-    val certName: String,
+    val issuer: String
+)
+
+data class CertificateRequest(
+    val certificateName: String,
+    val expirationDate: LocalDate,
+    val recipientName: String,
+    val recipientLastname: String,
+    val recipientEmail: String,
     val issuer: String
 )
 
 data class CertificateEmailRequest(
-    @JsonProperty("checksum") val checksum: String,
-    @JsonProperty("recipientName") val recipientName: String,
-    @JsonProperty("recipientSurname") val recipientSurname: String,
-    @JsonProperty("recipientEmail") val recipientEmail: String,
-    @JsonProperty("issuer") val issuer: String
+    val checksum: String,
+    val recipientName: String,
+    val recipientLastname: String,
+    val recipientEmail: String,
+    val issuer: String
 )

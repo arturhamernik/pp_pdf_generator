@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 @Service
 class CertificateValidator {
-    fun validateCertificate(index: Int, certificate: CsvCertificateRecord) {
+    fun validateCertificate(certificate: CsvCertificateRecord, index: Int = 1) {
         when {
             certificate.certName.isEmpty() -> throw ValidationException("Certificate name empty at line $index")
             certificate.firstName.isEmpty() -> throw ValidationException("Certificate recipient name empty at line $index")

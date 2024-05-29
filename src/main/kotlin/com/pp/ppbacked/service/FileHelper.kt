@@ -22,7 +22,6 @@ class FileHelper(
 
     fun getFileFromResources(filename: String): File {
         val filePath: String = certificateDirectory + "${filename}.pdf"
-
         return File(filePath)
     }
 }

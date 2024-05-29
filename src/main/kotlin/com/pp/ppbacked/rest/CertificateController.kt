@@ -1,10 +1,7 @@
 package com.pp.ppbacked.rest
 
 import com.pp.ppbacked.service.CertificateService
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestPart
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
@@ -14,7 +11,13 @@ class CertificateController(
 ) {
 
     @PostMapping
-    fun generate(@RequestPart file: MultipartFile, @RequestPart issuer: String): List<CertificateDto> {
-        return certificateService.generate(file, issuer)
+    fun generateAndSaveCert(@RequestBody request: CertificateRequest): CertificateResponse {
+        return certificateService.generateAndSaveCert(request)
     }
+
+    @PostMapping("/bulk")
+    fun generateAndSaveCerts(@RequestPart file: MultipartFile, @RequestPart issuer: String): List<CertificateResponse> {
+        return certificateService.generateAndSaveCertsFromCsv(file, issuer)
+    }
+
 }
