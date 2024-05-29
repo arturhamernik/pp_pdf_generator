@@ -9,12 +9,11 @@ services:
       resources:
         limits:
           cpus: "1"
-          memory: "512m"
+          memory: "256m"
     ports:
       - "${APP_PORT}:${APP_PORT}"
     restart: always
     environment:
-      - JAVA_OPTS= "-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
       - SPRING_MAIL_HOST=smtp.gmail.com
       - SPRING_MAIL_PORT=587
       - SPRING_MAIL_USERNAME=no.reply.cert.repo@gmail.com
