@@ -1,9 +1,12 @@
 # Use an official OpenJDK runtime as a parent image
 FROM openjdk:17-jdk-alpine
 
+ARG APP_PORT
+
 # Set environment variables for UID and GID
 ENV UID="1000"
 ENV GID="1000"
+ENV APP_PORT=${APP_PORT}
 
 # Create a group and user with the specified UID and GID
 RUN addgroup -g "${GID}" builder && \
@@ -23,7 +26,7 @@ RUN mkdir -p /app/certificates && \
 USER builder
 
 # Make port 8081 available to the world outside this container
-EXPOSE 8081
+EXPOSE ${APP_PORT}
 
 # Run the JAR file
 ENTRYPOINT ["java", "-jar", "/app/pp_backend-0.0.1-SNAPSHOT.jar"]
