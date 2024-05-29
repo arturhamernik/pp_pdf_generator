@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+    image: pp-backend
+    user: "1000:1000"
+    ports:
+      - "8081:8081"
+    restart: always
+    environment:
+      - JAVA_OPTS= "-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=no.reply.cert.repo@gmail.com
+      - SPRING_MAIL_PASSWORD=
+    networks:
+      - default
+volumes:
+  postgres_data:
+
+networks:
+  default: { }

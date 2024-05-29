@@ -1,4 +1,4 @@
 CERTIFICATE_NAME,FIRST_NAME,LAST_NAME,EMAIL,EXPIRATION_DATE
-Certyfikat-A,Jan,Testowy,jan.testowy@gmail.com,2027-01-12
-Certyfikat-B,Anna,Nowak,anowak@gmail.com,2030-01-12
-Certyfikat-C,Marian,Przykładowy,m.przyklad@gmail.com,2027-12-12
+Certyfikat-A,Jan,Testowy,jan.testowy@tempmail.com,2027-01-12
+Certyfikat-B,Anna,Nowak,anowak@tempmail.com,2030-01-12
+Certyfikat-C,Marian,Przykładowy,m.przyklad@tempmail.com,2027-12-12
