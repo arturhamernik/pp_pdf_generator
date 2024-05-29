@@ -1,5 +1,6 @@
 package com.pp.ppbacked.service
 
+import com.pp.ppbacked.common.EmailValidator
 import com.pp.ppbacked.common.ValidationException
 import com.pp.ppbacked.rest.CertificateEmailRequest
 import jakarta.mail.internet.MimeMessage
@@ -30,8 +31,8 @@ class EmailSenderService(
     }
 
     private fun createMessage(request: CertificateEmailRequest): MimeMessage {
-        if (!isValidEmail(request.recipientEmail)) {
-            throw ValidationException("Invalid email: ${request.recipientEmail} for checksum : ${request.checksum}")
+        if (!EmailValidator.isValidEmail(request.recipientEmail)) {
+            throw ValidationException("Invalid email: ${request.recipientEmail}")
         }
 
         val certificatePdf = fileHelper.getFileFromResources(request.checksum)
@@ -69,11 +70,6 @@ class EmailSenderService(
             )
         }
         logger.info("Email to: $recipientEmail sent successfully!")
-    }
-
-    private fun isValidEmail(email: String): Boolean {
-        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
-        return emailRegex.matches(email)
     }
 
 }
