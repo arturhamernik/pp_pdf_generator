@@ -14,6 +14,7 @@ services:
       - "${APP_PORT}:${APP_PORT}"
     restart: always
     environment:
+      - JAVA_OPTS="-Xmx128m -Xms128m -XX:MaxMetaspaceSize=64m -XX:+UseSerialGC"
       - SPRING_MAIL_HOST=smtp.gmail.com
       - SPRING_MAIL_PORT=587
       - SPRING_MAIL_USERNAME=no.reply.cert.repo@gmail.com
