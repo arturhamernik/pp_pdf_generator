@@ -21,7 +21,7 @@ class CertificateService(
         val csvRecordCert = CsvCertificateRecord(
             certName = request.certificateName,
             firstName = request.recipientName,
-            lastName = request.recipientLastname,
+            lastName = request.recipientLastName,
             email = request.recipientEmail,
             expirationDate = request.expirationDate
         )
@@ -33,7 +33,7 @@ class CertificateService(
         return CertificateResponse(
             checksum = pdfChecksum,
             recipientName = request.recipientName,
-            recipientLastname = request.recipientLastname,
+            recipientLastName = request.recipientLastName,
             recipientEmail = request.recipientEmail,
             daysValid = calculateDaysValid(request.expirationDate),
             certificateName = request.certificateName,
@@ -55,7 +55,7 @@ class CertificateService(
             CertificateResponse(
                 checksum = checksum,
                 recipientName = cert.firstName,
-                recipientLastname = cert.lastName,
+                recipientLastName = cert.lastName,
                 recipientEmail = cert.email,
                 daysValid = calculateDaysValid(cert.expirationDate),
                 certificateName = cert.certName,

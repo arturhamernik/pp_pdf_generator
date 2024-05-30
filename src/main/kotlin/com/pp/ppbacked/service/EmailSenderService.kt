@@ -47,12 +47,12 @@ class EmailSenderService(
         helper.setText(
             template.text!!.format(
                 request.recipientName,
-                request.recipientLastname,
+                request.recipientLastName,
                 request.issuer
             )
         )
         helper.addAttachment(
-            "Certificate_${request.recipientName + "_" + request.recipientLastname}.pdf",
+            "Certificate_${request.recipientName + "_" + request.recipientLastName}.pdf",
             certificatePdf
         )
 
@@ -61,15 +61,11 @@ class EmailSenderService(
 
     private fun sendEmail(message: MimeMessage, checksum: String, recipientEmail: String) {
         try {
-            logger.info("Sending email!")
             emailSender.send(message)
+            logger.info("Email to: $recipientEmail sent successfully!")
         } catch (ex: MailException) {
-            logger.warn(
-                "Could not send email to: $recipientEmail for checksum: $checksum",
-                ex.message
-            )
+            logger.warn("Could not send email to: $recipientEmail for checksum: $checksum", ex)
         }
-        logger.info("Email to: $recipientEmail sent successfully!")
     }
 
 }

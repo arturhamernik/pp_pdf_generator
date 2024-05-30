@@ -16,11 +16,13 @@ services:
     restart: always
     environment:
       - JAVA_OPTS="-Xmx128m -Xms128m -XX:MaxMetaspaceSize=64m -XX:+UseSerialGC"
+      - APP_PORT=${APP_PORT}
+      - PDFS_LOCATION=/app/certificates/
       - SPRING_MAIL_HOST=smtp.gmail.com
       - SPRING_MAIL_PORT=587
       - SPRING_MAIL_USERNAME=no.reply.cert.repo@gmail.com
       - SPRING_MAIL_PASSWORD=
-      - APP_PORT=${APP_PORT}
+
     networks:
       - default
 volumes:
