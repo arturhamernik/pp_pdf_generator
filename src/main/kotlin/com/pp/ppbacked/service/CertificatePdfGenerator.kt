@@ -1,13 +1,20 @@
 package com.pp.ppbacked.service
 
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
+import org.apache.pdfbox.cos.COSArray
+import org.apache.pdfbox.cos.COSDocument
+import org.apache.pdfbox.cos.COSString
+import org.apache.pdfbox.pdmodel.PDDocument
 import org.jsoup.Jsoup
+import org.jsoup.helper.W3CDom
 import org.jsoup.nodes.Document
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.xhtmlrenderer.pdf.ITextRenderer
 import java.io.ByteArrayOutputStream
 
 @Service
 class CertificatePdfGenerator {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     companion object {
         private val htmlTemplate: String by lazy {
@@ -39,19 +46,50 @@ class CertificatePdfGenerator {
                 .escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml)
         }
 
-        val renderer = ITextRenderer().apply {
-            setDocumentFromString(document.html())
-            layout()
-        }
+        val w3cDoc = W3CDom().fromJsoup(document)
+        val pdfBytes = renderPdf(w3cDoc)
+        return cleanPdf(pdfBytes)
+    }
 
-        return ByteArrayOutputStream().apply {
-            renderer.createPDF(this)
-        }.toByteArray()
+    private fun renderPdf(w3cDoc: org.w3c.dom.Document): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        PdfRendererBuilder().apply {
+            toStream(outputStream)
+            withW3cDocument(w3cDoc, "/")
+            run()
+        }
+        return outputStream.toByteArray()
+    }
+
+    private fun cleanPdf(pdfBytes: ByteArray): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        PDDocument.load(pdfBytes).use { pdDocument ->
+            pdDocument.documentInformation.creationDate = null
+            hardcodeDocumentID(pdDocument.document)
+            pdDocument.save(outputStream)
+        }
+        return outputStream.toByteArray()
+    }
+
+    // required so the pdf doesnt have different auto generated id each run
+    private fun hardcodeDocumentID(document: COSDocument) {
+        val cosArray: COSArray = document.documentID
+        try {
+            if (cosArray.size() > 1) {
+                cosArray[0] = COSString("X")
+                cosArray[1] = COSString("X")
+                document.documentID = cosArray
+            } else {
+                logger.warn("COSArray does not have enough elements")
+            }
+        } catch (e: Exception) {
+            logger.error("An error occurred while updating the document ID", e)
+        }
     }
 
     private fun String.replaceValues(replacements: Map<String, String>): String {
-        return replacements.entries.fold(this) { acc, replacement ->
-            acc.replace(replacement.key, replacement.value)
+        return replacements.entries.fold(this) { acc, (key, value) ->
+            acc.replace(key, value)
         }
     }
 }
