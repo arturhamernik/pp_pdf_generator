@@ -28,17 +28,16 @@ class CertificatePdfGenerator {
     }
 
     fun generatePdfBytes(csvCertificateRecord: CsvCertificateRecord, issuer: String): ByteArray {
-        return htmlTemplate
-            .replaceValues(
-                mapOf(
-                    "\${firstName}" to csvCertificateRecord.firstName,
-                    "\${lastName}" to csvCertificateRecord.lastName,
-                    "\${certName}" to csvCertificateRecord.certName,
-                    "\${expirationDate}" to csvCertificateRecord.expirationDate.toString(),
-                    "\${issuer}" to issuer
-                )
-            )
-            .let { generatePdfFromHtml(it) }
+        val replacements = mapOf(
+            "\${firstName}" to csvCertificateRecord.firstName,
+            "\${lastName}" to csvCertificateRecord.lastName,
+            "\${certName}" to csvCertificateRecord.certName,
+            "\${expirationDate}" to csvCertificateRecord.expirationDate.toString(),
+            "\${issuer}" to issuer
+        )
+
+        val htmlContent = replaceTemplateValues(htmlTemplate, replacements)
+        return generatePdfFromHtml(htmlContent)
     }
 
     private fun generatePdfFromHtml(htmlContent: String): ByteArray {
@@ -70,16 +69,15 @@ class CertificatePdfGenerator {
     }
 
     private fun cleanPdf(pdfBytes: ByteArray): ByteArray {
-        val outputStream = ByteArrayOutputStream()
-        PDDocument.load(pdfBytes).use { pdDocument ->
-            pdDocument.documentInformation.creationDate = null
-            hardcodeDocumentID(pdDocument.document)
-            pdDocument.save(outputStream)
+        return ByteArrayOutputStream().use { outputStream ->
+            PDDocument.load(pdfBytes).use { pdDocument ->
+                hardcodeDocumentID(pdDocument.document)
+                pdDocument.save(outputStream)
+            }
+            outputStream.toByteArray()
         }
-        return outputStream.toByteArray()
     }
 
-    // required so the pdf doesnt have different auto generated id each run
     private fun hardcodeDocumentID(document: COSDocument) {
         val cosArray: COSArray = document.documentID
         try {
@@ -95,9 +93,15 @@ class CertificatePdfGenerator {
         }
     }
 
-    private fun String.replaceValues(replacements: Map<String, String>): String {
-        return replacements.entries.fold(this) { acc, (key, value) ->
-            acc.replace(key, value)
+    private fun replaceTemplateValues(template: String, replacements: Map<String, String>): String {
+        val stringBuilder = StringBuilder(template)
+        for ((key, value) in replacements) {
+            var index = stringBuilder.indexOf(key)
+            while (index != -1) {
+                stringBuilder.replace(index, index + key.length, value)
+                index = stringBuilder.indexOf(key, index + value.length)
+            }
         }
+        return stringBuilder.toString()
     }
 }
