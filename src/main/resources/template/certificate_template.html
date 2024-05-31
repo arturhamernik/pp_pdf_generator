@@ -4,31 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificate</title>
-    <link href="https://fonts.googleapis.com/css?family=Libre%20Baskerville" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&family=Libre+Baskerville&display=swap"
+          rel="stylesheet">
     <style>
         body {
             font-family: 'Nunito Sans', sans-serif;
+            height: 100%;
+            display: grid;
+            place-items: center;
         }
+
+        .container {
+            text-align: center;
+        }
+
         .certificate {
-            max-width: 800px;
-            margin: 10px;
+            margin: 25px auto;
             border: 10px solid #507091;
             border-radius: 10px;
             padding: 50px;
+            display: inline-block;
+            text-align: left;
+            min-width: 90%;
+            min-height: 100%;
         }
+
         .header {
             font-family: 'Libre Baskerville', serif;
             text-align: center;
         }
+
         .certificate-header {
             font-size: 50px;
             text-transform: uppercase;
             display: block;
         }
+
         .certificate-subheader {
             font-size: 25px;
             text-transform: uppercase;
         }
+
         .certificate-receiver {
             display: block;
             font-family: 'Libre Baskerville', serif;
@@ -38,33 +54,38 @@
             text-align: center;
             margin: 10px 0;
         }
+
         .content {
             margin-top: 30px;
             text-align: center;
         }
+
         .issuer {
             padding: 5px;
             display: inline-block;
             border-bottom: 2px solid #507091;
         }
+
         .certificate-course-name {
             font-weight: bold;
             font-size: 25px;
-            text-transform: capitalize;
             font-family: 'Libre Baskerville', serif;
             text-align: center;
             display: block;
             margin: 10px 0;
         }
+
         .my-footer {
             text-align: right;
             margin-top: 30px;
             display: block;
         }
+
         .issuer-container {
             display: inline-block;
             text-align: center;
         }
+
         .issuer-label {
             display: block;
             margin-top: 5px;
@@ -73,24 +94,26 @@
     </style>
 </head>
 <body>
-<div class="certificate">
-    <div class="header">
-        <span class="certificate-header">Certificate</span>
-        <span class="certificate-subheader">of Completion</span>
-    </div>
-    <div class="content">
-        <div>This is to certify that</div>
-        <div class="certificate-receiver">${firstName} ${lastName}</div>
-        <div class="">has successfully completed the course</div>
-        <div class="certificate-course-name">${certName}</div>
-        <div class="">Certificate valid until ${expirationDate}</div>
-    </div>
-    <div class="my-footer">
-        <div class="issuer-container">
-            <div class="issuer">
-                <span>${issuer}</span>
+<div class="container">
+    <div class="certificate">
+        <div class="header">
+            <span class="certificate-header">Certificate</span>
+            <span class="certificate-subheader">of Completion</span>
+        </div>
+        <div class="content">
+            <div>This is to certify that</div>
+            <div class="certificate-receiver">${firstName} ${lastName}</div>
+            <div class="">has successfully completed the course</div>
+            <div class="certificate-course-name">${certName}</div>
+            <div class="">Certificate is valid until ${expirationDate}</div>
+        </div>
+        <div class="my-footer">
+            <div class="issuer-container">
+                <div class="issuer">
+                    <span>${issuer}</span>
+                </div>
+                <span class="issuer-label">Issuer</span>
             </div>
-            <span class="issuer-label">Issuer</span>
         </div>
     </div>
 </div>

@@ -1,10 +1,12 @@
 package com.pp.ppbacked.service
 
+import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder.PageSizeUnits
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import org.apache.pdfbox.cos.COSArray
 import org.apache.pdfbox.cos.COSDocument
 import org.apache.pdfbox.cos.COSString
 import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.jsoup.Jsoup
 import org.jsoup.helper.W3CDom
 import org.jsoup.nodes.Document
@@ -52,13 +54,19 @@ class CertificatePdfGenerator {
     }
 
     private fun renderPdf(w3cDoc: org.w3c.dom.Document): ByteArray {
-        val outputStream = ByteArrayOutputStream()
-        PdfRendererBuilder().apply {
-            toStream(outputStream)
-            withW3cDocument(w3cDoc, "/")
-            run()
+        return ByteArrayOutputStream().use { outputStream ->
+            PdfRendererBuilder().apply {
+                toStream(outputStream)
+                withW3cDocument(w3cDoc, "/")
+                useDefaultPageSize(
+                    PDRectangle.A4.height / 72.0f,
+                    PDRectangle.A4.width / 72.0f,
+                    PageSizeUnits.INCHES
+                )
+                run()
+            }
+            outputStream.toByteArray()
         }
-        return outputStream.toByteArray()
     }
 
     private fun cleanPdf(pdfBytes: ByteArray): ByteArray {
