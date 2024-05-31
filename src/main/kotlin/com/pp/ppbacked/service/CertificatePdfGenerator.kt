@@ -71,6 +71,7 @@ class CertificatePdfGenerator {
     private fun cleanPdf(pdfBytes: ByteArray): ByteArray {
         return ByteArrayOutputStream().use { outputStream ->
             PDDocument.load(pdfBytes).use { pdDocument ->
+                pdDocument.documentInformation.creationDate = null
                 hardcodeDocumentID(pdDocument.document)
                 pdDocument.save(outputStream)
             }
@@ -78,6 +79,7 @@ class CertificatePdfGenerator {
         }
     }
 
+    // required so the pdf doesnt have different auto generated id each run
     private fun hardcodeDocumentID(document: COSDocument) {
         val cosArray: COSArray = document.documentID
         try {
