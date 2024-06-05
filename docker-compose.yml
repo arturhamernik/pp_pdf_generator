@@ -24,11 +24,17 @@ services:
       - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
       - SSL_KEY_STORE_PASSWORD=${SSL_KEY_STORE_PASSWORD}
     networks:
-      - default
+      pp-backend:
+        ipv4_address: 172.20.0.2
     volumes:
       - pp_backend_data:/app/certificates/
 volumes:
   pp_backend_data:
 
 networks:
-  default: { }
+  pp-backend:
+    driver: bridge
+    internal: false
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
