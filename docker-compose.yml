@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  app:
+  pp-backend:
     build:
       context: .
     image: pp-backend
@@ -21,10 +21,12 @@ services:
       - SPRING_MAIL_HOST=smtp.gmail.com
       - SPRING_MAIL_PORT=587
       - SPRING_MAIL_USERNAME=no.reply.cert.repo@gmail.com
-      - SPRING_MAIL_PASSWORD=
-
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+      - SSL_KEY_STORE_PASSWORD=${SSL_KEY_STORE_PASSWORD}
     networks:
       - default
+    volumes:
+      - pp_backend_data:/app/certificates/
 volumes:
   pp_backend_data:
 
